@@ -1,7 +1,7 @@
 import socket
 import threading
 import os
-from openai import OpenAI
+from openai import OpenAI  # 此处假设您使用的是 OpenAI SDK
 from dotenv import load_dotenv
 
 # 加载环境变量
@@ -11,21 +11,22 @@ load_dotenv()
 HOST = '0.0.0.0'  # 监听所有可用的网络接口
 PORT = 9999       # 网关服务的端口
 
-# 创建 OpenAI 客户端，并使用环境变量中的 API 密钥
-api_key = os.getenv("OPENAI_API_KEY")
-if api_key is None:
-    raise ValueError("API key not found. Please set the OPENAI_API_KEY environment variable.")
-
-client = OpenAI(api_key=api_key)
+# 创建 DeepSeek 客户端
+client = OpenAI(
+    api_key=os.getenv('DEEPSEEK_API_KEY'),  # 使用环境变量中的 API 密钥
+    base_url="https://api.chatanywhere.tech/v1"  # DeepSeek API 基础 URL
+)
 
 def chat_with_bot(user_message):
-    """通过 OpenAI API 与聊天机器人交互"""
+    """通过 DeepSeek API 与聊天机器人交互"""
     try:
         response = client.chat.completions.create(
-            model="gpt-4o",  # 使用合适的模型
+            model="deepseek-chat",
             messages=[
+                {"role": "system", "content": "You are a helpful assistant."},
                 {"role": "user", "content": user_message}
             ],
+            stream=False
         )
         return response.choices[0].message.content
     except Exception as e:
@@ -42,7 +43,7 @@ def handle_client(conn, addr):
 
             print(f"Received request from {addr}: {request}")
 
-            # 通过聊天 API 生成回应
+            # 通过 DeepSeek API 生成回应
             ai_response = chat_with_bot(request)
 
             # 包装回应
