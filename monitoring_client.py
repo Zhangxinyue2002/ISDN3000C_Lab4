@@ -1,39 +1,31 @@
 import socket
-import time
-import json
 
-# --- TODO: Configure these values --- #
-SERVER_IP = '192.168.127.10'  # The IP address of your RDK-X5
+SERVER_IP = '192.168.127.10'  # RDK-X5 的 IP 地址
 SERVER_PORT = 9999
-REQUEST_MESSAGE = "GET_DATA" # The message your server expects
-# --- END OF TODO --- #
 
 def run_client():
     while True:
-        print("-" * 30)
-        print(f"Attempting to connect to {SERVER_IP}:{SERVER_PORT}...")
+        user_input = input("Is there anything I can help you? Type it here!（or type 'exit' to end）：")
+        if user_input.lower() == 'exit':
+            break
+
         try:
-            print("Connected to the server.")
-            # --- TODO: YOUR CODE GOES HERE --- #
-            # 1. Create a socket object.
-            # 2. Use a 'with' statement for automatic cleanup.
-            # 3. Connect to the server.
-            # 4. Send the REQUEST_MESSAGE, encoded to bytes.
-            # 5. Receive the response from the server (e.g., up to 4096 bytes).
-            # 6. Decode the response from bytes to a string.
-            # 7. (Recommended) If you used JSON, parse the string into a dictionary.
-            #    Example: data = json.loads(response_string)
-            # 8. Print the received data in a user-friendly format.
-            # --- END OF TODO --- #
+            # 创建 socket 并连接服务器
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as client_socket:
+                client_socket.connect((SERVER_IP, SERVER_PORT))
+                client_socket.sendall(user_input.encode('utf-8'))  # 发送用户烦恼的信息
+                
+                # 接收服务器的响应
+                response = client_socket.recv(4096)  
+                response_string = response.decode('utf-8')
+                
+                print("RDK-X5 's feedback:")
+                print(response_string)
 
         except ConnectionRefusedError:
-            print("Connection failed. Is the server running?")
+            print("Connection failed. ")
         except Exception as e:
-            print(f"An error occurred: {e}")
-
-        # Wait for 60 seconds before the next request
-        print("\nWaiting for 60 seconds...")
-        time.sleep(60)
+            print(f"Error: {e}")
 
 if __name__ == "__main__":
     run_client()
